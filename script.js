@@ -1,5 +1,6 @@
 let currentPokemon;
 let allPokemons = [];
+let pokemonSpezies = [];
 
 async function loadPokemons() {
     let url = `https://pokeapi.co/api/v2/pokemon?limit=10&offset=0`;
@@ -14,11 +15,13 @@ async function loadPokemons() {
 
         allPokemons.push(currentPokemon);
 
+		//console.log(currentPokemon);
+
         document.getElementById('show-pokemons').innerHTML += `
         <div onclick="showDetailpage(${i})" class="card flex ${getCardColorClass(currentPokemon['types'])}">
             <div class="text">
                 <h2 id="pokemon-name">${pokemonNames[i]['name']}</h2>
-                <div id="type" class="element">${generateElement()}</div>
+                <div id="type" class="element">${generateElement(i)}</div>
             </div>
             <div class="images">
                 <img class="background" src="./img/pokeball-background.svg" alt="">
@@ -29,8 +32,8 @@ async function loadPokemons() {
     }
 }
 
-function generateElement() {
-    let types = currentPokemon['types'];
+function generateElement(i) {
+    let types = allPokemons[i]['types'];
     let typeHTML = ''; // Initialisiere eine leere Zeichenkette
 
     for (let j = 0; j < types.length; j++) {
@@ -41,6 +44,20 @@ function generateElement() {
     }
 
     return typeHTML; // Gib den generierten HTML-Code zurück
+}
+
+function generateAbility(i) {
+    let abilities = allPokemons[i]['abilities'];
+    let abilitiesHTML = ''; // Initialisiere eine leere Zeichenkette
+
+    for (let j = 0; j < abilities.length; j++) {
+        let ability = abilities[j]['ability']['name'];
+        abilitiesHTML += `
+            ${ability}
+        `;
+    }
+
+    return abilitiesHTML; // Gib den generierten HTML-Code zurück
 }
 
 function getCardColorClass(types) {
@@ -69,15 +86,13 @@ function showDetailpage(i) {
 
 	document.getElementById('fullpage').style.zIndex = 0;
 	document.getElementById('detailpage').innerHTML = `
-	<div id="pokedex">
+	<div id="pokedex" class="${getCardColorClass(pokemon['types'])}">
 		<div class="p-16">
 			<div class="header flex space-between">
 				<h1 id="pokemon-name">${pokemon['name']}</h1>
 				<h2>#${i + 1}</h2>
 			</div>
-			<div class="element p-t-16">
-				<p class="element-name">fire</p>
-			</div>
+			<div id="type" class="element p-t-16">${generateElement(i)}</div>
 			<div class="images">
 				<img class="background-img" src="./img/pokeball-background.svg" alt="">
 				<img class="flex p-t-24" id="pokemon-img" src="${pokemon['sprites']['other']['dream_world']['front_default']}" alt="">
@@ -128,27 +143,39 @@ function showDetailpage(i) {
 	`;
 }
 
+async function urlAbout(i) {
+	let url = `https://pokeapi.co/api/v2/pokemon-species/${i + 1}/`;
+	let response = await fetch(url);
+	let responseAsJson = await response.json();
+
+	pokemonSpezies.push(responseAsJson);
+}
+
 function generateAbout(i) {
 	let pokemon = allPokemons[i];
+	let pokemonSpezie = pokemonSpezies[i];
+
+	console.log(pokemonSpezies);
+
 	let about = document.getElementById('info-table');
 	about.innerHTML = '';
 	about.innerHTML = `
 		<table>
 			<tr>
 				<td class="character">Species</td>
-				<td>Spezies</td>
+				<td>${urlAbout(i)}</td>
 			</tr>
 			<tr>
 				<td class="character">Height</td>
-				<td>${pokemon['height']}</td>
+				<td>${pokemon['height']}cm</td>
 			</tr>
 			<tr>
 				<td class="character">Weight</td>
-				<td>${pokemon['weight']}</td>
+				<td>${pokemon['weight']}g</td>
 			</tr>
 			<tr>
 				<td class="character">Abilities</td>
-				<td>Spezies</td>
+				<td>${generateAbility(i)}</td>
 			</tr>
 			<tr>
 				<td>
