@@ -124,3 +124,16 @@ header {
 #moves {
     padding: 16px;
 }
+.progress {
+	width: 120px;
+    height: 10px;
+    border-radius: 12px;
+    margin-left: 16px;
+    border: 1px solid red;
+}
+.progress-bar {
+	width: 54%;
+    height: 10px;
+    background-color: red;
+    border-radius: 12px;
+}

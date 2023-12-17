@@ -28,6 +28,9 @@ body {
 .justify-center {
 	justify-content: center;
 }
+.align-center {
+	align-items: center;
+}
 p, h1, h2 {
 	margin: 0;
 }

@@ -15,8 +15,6 @@ async function loadPokemons() {
 
         allPokemons.push(currentPokemon);
 
-		//console.log(currentPokemon);
-
         document.getElementById('show-pokemons').innerHTML += `
         <div onclick="showDetailpage(${i})" class="card flex ${getCardColorClass(currentPokemon['types'])}">
             <div class="text">
@@ -56,7 +54,6 @@ function generateAbility(i) {
             ${ability}
         `;
     }
-
     return abilitiesHTML; // Gib den generierten HTML-Code zurück
 }
 
@@ -77,12 +74,12 @@ function getCardColorClass(types) {
             typeClass = 'blue'; // Zum Beispiel, für Wasser auch 'blue' verwenden
         }
     }
-
     return typeClass;
 }
 
 function showDetailpage(i) {
 	let pokemon = allPokemons[i];
+	urlAbout(i);
 
 	document.getElementById('fullpage').style.zIndex = 0;
 	document.getElementById('detailpage').innerHTML = `
@@ -105,39 +102,7 @@ function showDetailpage(i) {
 				<p class="info" onclick="generateEvolution(${i})">Evolution</p>
 				<p class="info" onclick="generateMoves(${i})">Moves</p>
 			</div>
-			<div id="info-table">
-				<table>
-					<tr>
-						<td class="character">Species</td>
-						<td>Spezies</td>
-					</tr>
-					<tr>
-						<td class="character">Height</td>
-						<td>Spezies</td>
-					</tr>
-					<tr>
-						<td class="character">Weight</td>
-						<td>Spezies</td>
-					</tr>
-					<tr>
-						<td class="character">Abilities</td>
-						<td>Spezies</td>
-					</tr>
-					<tr>
-						<td>
-							<h3>Breeding</h3>
-						</td>
-					</tr>
-					<tr>
-						<td class="character">Egg Groups</td>
-						<td>Spezies</td>
-					</tr>
-					<tr>
-						<td class="character">Egg Cycle</td>
-						<td>Spezies</td>
-					</tr>
-				</table>
-			</div>
+			<div id="info-table"></div>
 		</div>
 	</div>
 	`;
@@ -153,9 +118,6 @@ async function urlAbout(i) {
 
 function generateAbout(i) {
 	let pokemon = allPokemons[i];
-	let pokemonSpezie = pokemonSpezies[i];
-
-	console.log(pokemonSpezies);
 
 	let about = document.getElementById('info-table');
 	about.innerHTML = '';
@@ -163,7 +125,7 @@ function generateAbout(i) {
 		<table>
 			<tr>
 				<td class="character">Species</td>
-				<td>${urlAbout(i)}</td>
+				<td>${pokemonSpezies[0]['genera'][7]['genus']}</td>
 			</tr>
 			<tr>
 				<td class="character">Height</td>
@@ -184,11 +146,11 @@ function generateAbout(i) {
 			</tr>
 			<tr>
 				<td class="character">Egg Groups</td>
-				<td>Spezies</td>
+				<td>${pokemonSpezies[0]['egg_groups'][0]['name']}</td>
 			</tr>
 			<tr>
 				<td class="character">Egg Cycle</td>
-				<td>Spezies</td>
+				<td>${pokemonSpezies[0]['egg_groups'][1]['name']}</td>
 			</tr>
 		</table>
 	`;
@@ -197,38 +159,43 @@ function generateAbout(i) {
 function generateStats(i) {
 	let pokemon = allPokemons[i];
 	let about = document.getElementById('info-table');
+	let stats = pokemon['stats'];
+	let sum = 0;
+
+	// Funktion zur Berechnung des Prozentsatzes
+	function berechneProzentsatz(halfNumber, wholeNumber) {
+		return (halfNumber / wholeNumber) * 100;
+	}
+
 	about.innerHTML = '';
 	about.innerHTML = `
-		<table>
-			<tr>
-				<td class="character">HP</td>
-				<td>${pokemon[0]['base_stat']}</td>
-			</tr>
-			<tr>
-				<td class="character">Attack</td>
-				<td>${pokemon[1]['base_stat']}</td>
-			</tr>
-			<tr>
-				<td class="character">Defense</td>
-				<td>${pokemon[2]['base_stat']}</td>
-			</tr>
-			<tr>
-				<td class="character">Special-Attack</td>
-				<td>${pokemon[3]['base_stat']}</td>
-			</tr>
-			<tr>
-				<td class="character">Special-Defense</td>
-				<td>${pokemon[4]['base_stat']}</td>
-			</tr>
-			<tr>
-				<td class="character">Speed</td>
-				<td>Spezies</td>
-			</tr>
-			<tr>
-				<td class="character">Total</td>
-				<td>Spezies</td>
-			</tr>
-		</table>
+		<table id="stats"></table>
+	`;
+
+	for (let j = 0; j < stats.length; j++) {
+		let statName = stats[j]['stat']['name'];
+		let baseStat = stats[j]['base_stat'];
+		sum += baseStat;
+
+		let prozent = berechneProzentsatz(baseStat, 100);
+
+		document.getElementById('stats').innerHTML += `
+		<tr>
+			<td class="character">${statName}</td>
+			<td class="flex align-center">
+				<p>${baseStat}</p>
+				<div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+					<div class="progress-bar" style="width: ${prozent}%"></div>
+				</div>
+			</td>
+		</tr>
+		`;
+	}
+	document.getElementById('stats').innerHTML += `
+		<tr>
+			<td class="character">Total</td>
+			<td>${sum}</td>
+		</tr>
 	`;
 }
 
