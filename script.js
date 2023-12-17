@@ -119,6 +119,8 @@ async function urlAbout(i) {
 function generateAbout(i) {
 	let pokemon = allPokemons[i];
 
+	console.log(pokemonSpezies);
+
 	let about = document.getElementById('info-table');
 	about.innerHTML = '';
 	about.innerHTML = `
@@ -197,6 +199,15 @@ function generateStats(i) {
 			<td>${sum}</td>
 		</tr>
 	`;
+}
+
+async function generateEvolution(i) {
+	let url = `https://pokeapi.co/api/v2/evolution-chain/${i + 1}/`;
+	let response = await fetch(url);
+	let responseAsJson = await response.json();
+	let evolvesTo = responseAsJson['chain']['evolves_to'][0]['species']['name']
+
+	console.log(responseAsJson);
 }
 
 function generateMoves(i) {
