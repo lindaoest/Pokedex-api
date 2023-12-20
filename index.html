@@ -9,10 +9,13 @@
 	<link rel="stylesheet" href="./default.css">
 </head>
 <body onload="loadPokemons()">
+	<div id="loading">
+		<img id="loading-spinner" src="./img/ball.png" width="160" height="160" alt="">
+	</div>
 	<div id="fullpage" class="fullpage">
 		<header>
 			<h1>Pokedex</h1>
-			<input class="search" placeholder="Suche" type="text">
+			<input id="search" class="search" placeholder="Suche" type="text" onchange="filterPokemons()">
 		</header>
 		<div id="show-pokemons" class="all-pokemons flex-wrap justify-center p-t-24"></div>
 	</div>

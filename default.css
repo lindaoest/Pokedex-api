@@ -31,6 +31,9 @@ body {
 .align-center {
 	align-items: center;
 }
+.hidden {
+    display: none;
+}
 p, h1, h2 {
 	margin: 0;
 }

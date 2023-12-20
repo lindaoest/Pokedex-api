@@ -1,4 +1,23 @@
 /* Homepage */
+#loading {
+	position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 12;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+#loading-spinner {
+	animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 .fullpage {
 	position: relative;
 	z-index: 11;
@@ -19,11 +38,19 @@ header {
 .card {
 	overflow: hidden;
 	width: 350px;
-    background-color: red;
-    height: 200px;
-    border-radius: 12px;
-    padding: 16px;
+	background-color: red;
+	height: 200px;
+	border-radius: 12px;
+	padding: 16px;
 	color: white;
+}
+.card:hover #pokemon-img {
+	transform: scale(1.1);
+	transition: all 0.5s ease-in-out;
+	cursor: pointer;
+}
+.card #pokemon-img {
+	transition: all 0.5s ease-in-out;
 }
 .all-pokemons {
 	margin: 0 24px;
@@ -136,4 +163,17 @@ header {
     height: 10px;
     background-color: red;
     border-radius: 12px;
+}
+.evolution {
+	padding: 56px 16px 56px 38px;
+	gap: 40px;
+}
+.evolution-box {
+	display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+	align-items: center;
+}
+.evolution-img {
+	height: 80px;
 }

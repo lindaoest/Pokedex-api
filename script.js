@@ -1,33 +1,52 @@
 let currentPokemon;
 let allPokemons = [];
 let pokemonSpezies = [];
+let allNames = [];
 
 async function loadPokemons() {
-    let url = `https://pokeapi.co/api/v2/pokemon?limit=10&offset=0`;
-    let response = await fetch(url);
-    let responseAsJson = await response.json();
-    const pokemonNames = responseAsJson['results'];
+	showLoader();
 
-    for (let i = 0; i < pokemonNames.length; i++) {
-        let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
-        let response = await fetch(url);
-        currentPokemon = await response.json();
+	try {
+		let url = `https://pokeapi.co/api/v2/pokemon?limit=10&offset=0`;
+		let response = await fetch(url);
+		let responseAsJson = await response.json();
+		const pokemonNames = responseAsJson['results'];
 
-        allPokemons.push(currentPokemon);
+		for (let i = 0; i < pokemonNames.length; i++) {
+			let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
+			let response = await fetch(url);
+			currentPokemon = await response.json();
 
-        document.getElementById('show-pokemons').innerHTML += `
-        <div onclick="showDetailpage(${i})" class="card flex ${getCardColorClass(currentPokemon['types'])}">
-            <div class="text">
-                <h2 id="pokemon-name">${pokemonNames[i]['name']}</h2>
-                <div id="type" class="element">${generateElement(i)}</div>
-            </div>
-            <div class="images">
-                <img class="background" src="./img/pokeball-background.svg" alt="">
-                <img class="flex p-t-24 image" id="pokemon-img" src="${currentPokemon['sprites']['other']['dream_world']['front_default']}" alt="">
-            </div>
-        </div>
-        `;
-    }
+			allNames.push(currentPokemon['name'])
+			allPokemons.push(currentPokemon);
+
+			document.getElementById('show-pokemons').innerHTML += `
+			<div onclick="showDetailpage(${i})" class="card flex ${getCardColorClass(currentPokemon['types'])}">
+				<div class="text">
+					<h2 id="pokemon-name">${pokemonNames[i]['name']}</h2>
+					<div id="type" class="element">${generateElement(i)}</div>
+				</div>
+				<div class="images">
+					<img class="background" src="./img/pokeball-background.svg" alt="">
+					<img class="flex p-t-24 image" id="pokemon-img" src="${currentPokemon['sprites']['other']['dream_world']['front_default']}" alt="">
+				</div>
+			</div>
+			`;
+		}
+	} catch(error) {
+		console.error('Error loading pokemons:', error);
+	} finally {
+		hideLoader();
+	}
+
+}
+
+function showLoader() {
+	document.getElementById('loading').style.display = 'flex';
+}
+
+function hideLoader() {
+	document.getElementById('loading').style.display = 'none';
 }
 
 function generateElement(i) {
@@ -102,7 +121,7 @@ function showDetailpage(i) {
 				<p class="info" onclick="generateEvolution(${i})">Evolution</p>
 				<p class="info" onclick="generateMoves(${i})">Moves</p>
 			</div>
-			<div id="info-table"></div>
+			<div id="info-table">${generateAbout(i)}</div>
 		</div>
 	</div>
 	`;
@@ -119,41 +138,43 @@ async function urlAbout(i) {
 function generateAbout(i) {
 	let pokemon = allPokemons[i];
 
-	let about = document.getElementById('info-table');
-	about.innerHTML = '';
-	about.innerHTML = `
-		<table>
-			<tr>
-				<td class="character">Species</td>
-				<td>${pokemonSpezies[0]['genera'][7]['genus']}</td>
-			</tr>
-			<tr>
-				<td class="character">Height</td>
-				<td>${pokemon['height']}cm</td>
-			</tr>
-			<tr>
-				<td class="character">Weight</td>
-				<td>${pokemon['weight']}g</td>
-			</tr>
-			<tr>
-				<td class="character">Abilities</td>
-				<td>${generateAbility(i)}</td>
-			</tr>
-			<tr>
-				<td>
-					<h3>Breeding</h3>
-				</td>
-			</tr>
-			<tr>
-				<td class="character">Egg Groups</td>
-				<td>${pokemonSpezies[0]['egg_groups'][0]['name']}</td>
-			</tr>
-			<tr>
-				<td class="character">Egg Cycle</td>
-				<td>${pokemonSpezies[0]['egg_groups'][1]['name']}</td>
-			</tr>
-		</table>
-	`;
+	setTimeout(() => {
+		let about = document.getElementById('info-table');
+		about.innerHTML = '';
+		about.innerHTML = `
+			<table>
+				<tr>
+					<td class="character">Species</td>
+					<td>${pokemonSpezies[0]['genera'][7]['genus']}</td>
+				</tr>
+				<tr>
+					<td class="character">Height</td>
+					<td>${pokemon['height']}cm</td>
+				</tr>
+				<tr>
+					<td class="character">Weight</td>
+					<td>${pokemon['weight']}g</td>
+				</tr>
+				<tr>
+					<td class="character">Abilities</td>
+					<td>${generateAbility(i)}</td>
+				</tr>
+				<tr>
+					<td>
+						<h3>Breeding</h3>
+					</td>
+				</tr>
+				<tr>
+					<td class="character">Egg Groups</td>
+					<td>${pokemonSpezies[0]['egg_groups'][0]['name']}</td>
+				</tr>
+				<tr>
+					<td class="character">Egg Cycle</td>
+					<td>${pokemonSpezies[0]['egg_groups'][1]['name']}</td>
+				</tr>
+			</table>
+		`;
+	}, 100);
 }
 
 function generateStats(i) {
@@ -207,9 +228,37 @@ async function generateEvolution(i) {
 	let evolution2 = responseAsJson['chain']['evolves_to'][0]['species']['name'];
 	let evolution3 = responseAsJson['chain']['evolves_to'][0]['evolves_to'][0]['species']['name'];
 
-	console.log(evolution1);
-	console.log(evolution2);
-	console.log(evolution3);
+	function extractPokemonId(url) {
+		const parts = url.split('/');
+		return +parts[parts.length - 2];
+	}
+
+	let speciesUrl1 = responseAsJson['chain']['species']['url'];
+	let speciesUrl2 = responseAsJson['chain']['evolves_to'][0]['species']['url'];
+	let speciesUrl3 = responseAsJson['chain']['evolves_to'][0]['evolves_to'][0]['species']['url'];
+
+	// Die ID extrahieren
+	let pokemonId1 = extractPokemonId(speciesUrl1);
+	let pokemonId2 = extractPokemonId(speciesUrl2);
+	let pokemonId3 = extractPokemonId(speciesUrl3);
+
+	let about = document.getElementById('info-table');
+	about.innerHTML = `
+		<div class="evolution flex justify-center">
+			<div class="evolution-box">
+				<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemonId1}.svg">
+				<p>${evolution1}</p>
+			</div>
+			<div class="evolution-box">
+				<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemonId2}.svg">
+				<p>${evolution2}</p>
+			</div>
+			<div class="evolution-box">
+				<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemonId3}.svg">
+				<p>${evolution3}</p>
+			</div>
+		</div>
+	`;
 }
 
 function generateMoves(i) {
@@ -229,6 +278,18 @@ function generateMoves(i) {
 
 	// Füge das <p>-Element mit den Textknoten dem 'info-table'-Element hinzu
     about.appendChild(paragraph);
+}
+
+function filterPokemons() {
+	let search = document.getElementById('search').value;
+	search = search.toLowerCase();
+
+	for (let k = 0; k < allNames.length; k++) {
+		let name = allNames[k];
+		if(name.toLowerCase().includes(search)) {
+			console.log(`${name}`);
+		}
+	}
 }
 
 // async function loadPokemon() {
