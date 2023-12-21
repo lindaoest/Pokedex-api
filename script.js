@@ -20,18 +20,7 @@ async function loadPokemons() {
 			allNames.push(currentPokemon['name'])
 			allPokemons.push(currentPokemon);
 
-			document.getElementById('show-pokemons').innerHTML += `
-			<div onclick="showDetailpage(${i})" class="card flex ${getCardColorClass(currentPokemon['types'])}">
-				<div class="text">
-					<h2 id="pokemon-name">${pokemonNames[i]['name']}</h2>
-					<div id="type" class="element">${generateElement(i)}</div>
-				</div>
-				<div class="images">
-					<img class="background" src="./img/pokeball-background.svg" alt="">
-					<img class="flex p-t-24 image" id="pokemon-img" src="${currentPokemon['sprites']['other']['dream_world']['front_default']}" alt="">
-				</div>
-			</div>
-			`;
+			document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
 		}
 	} catch(error) {
 		console.error('Error loading pokemons:', error);
@@ -39,6 +28,21 @@ async function loadPokemons() {
 		hideLoader();
 	}
 
+}
+
+function generatePokemons(i, pokemonNames) {
+	return `
+	<div onclick="showDetailpage(${i})" class="card flex ${getCardColorClass(currentPokemon['types'])}">
+		<div class="text">
+			<h2 id="pokemon-name">${pokemonNames[i]['name']}</h2>
+			<div id="type" class="element">${generateElement(i)}</div>
+		</div>
+		<div class="images">
+			<img class="background" src="./img/pokeball-background.svg" alt="">
+			<img class="flex p-t-24 image" src="${currentPokemon['sprites']['other']['dream_world']['front_default']}" alt="">
+		</div>
+	</div>
+	`;
 }
 
 function showLoader() {
@@ -59,7 +63,6 @@ function generateElement(i) {
             <p class="element-name m-t-16">${type}</p>
         `;
     }
-
     return typeHTML; // Gib den generierten HTML-Code zurück
 }
 
@@ -90,7 +93,7 @@ function getCardColorClass(types) {
         } else if (typeNull === 'sky') {
             typeClass = 'blue';
         } else if (typeNull === 'water') {
-            typeClass = 'blue'; // Zum Beispiel, für Wasser auch 'blue' verwenden
+            typeClass = 'blue';
         }
     }
     return typeClass;
@@ -101,24 +104,31 @@ function showDetailpage(i) {
 	urlAbout(i);
 
 	document.getElementById('fullpage').style.zIndex = 0;
-	document.getElementById('detailpage').innerHTML = `
+	document.getElementById('detailpage').innerHTML = generateDetailpage(pokemon, i);
+}
+
+function generateDetailpage(pokemon, i) {
+	return `
 	<div id="pokedex" class="${getCardColorClass(pokemon['types'])}">
 		<div class="p-16">
 			<div class="header flex space-between">
-				<h1 id="pokemon-name">${pokemon['name']}</h1>
+				<div class="flex gap-16" onclick="closeDetailpage()">
+					<img class="back-arrow" src="./img/back-arrow.svg" alt="back-arrow">
+					<h1 id="pokemon-name">${pokemon['name']}</h1>
+				</div>
 				<h2>#${i + 1}</h2>
 			</div>
 			<div id="type" class="element p-t-16">${generateElement(i)}</div>
 			<div class="images">
-				<img class="background-img" src="./img/pokeball-background.svg" alt="">
-				<img class="flex p-t-24" id="pokemon-img" src="${pokemon['sprites']['other']['dream_world']['front_default']}" alt="">
+				<img class="background-img" src="./img/pokeball-background.svg" alt="pokemonball">
+				<img class="flex p-t-24" id="pokemon-img" src="${pokemon['sprites']['other']['dream_world']['front_default']}" alt="${pokemon['name']}">
 			</div>
 		</div>
 		<div class="container-white">
 			<div class="info-names flex">
 				<p class="info" onclick="generateAbout(${i})">About</p>
 				<p class="info" onclick="generateStats(${i})">Base Stats</p>
-				<p class="info" onclick="generateEvolution(${i})">Evolution</p>
+				<p class="info" onclick="generateEvolution()">Evolution</p>
 				<p class="info" onclick="generateMoves(${i})">Moves</p>
 			</div>
 			<div id="info-table">${generateAbout(i)}</div>
@@ -140,7 +150,6 @@ function generateAbout(i) {
 
 	setTimeout(() => {
 		let about = document.getElementById('info-table');
-		about.innerHTML = '';
 		about.innerHTML = `
 			<table>
 				<tr>
@@ -188,7 +197,6 @@ function generateStats(i) {
 		return (halfNumber / wholeNumber) * 100;
 	}
 
-	about.innerHTML = '';
 	about.innerHTML = `
 		<table id="stats"></table>
 	`;
@@ -220,7 +228,7 @@ function generateStats(i) {
 	`;
 }
 
-async function generateEvolution(i) {
+async function generateEvolution() {
 	let url = pokemonSpezies[0]['evolution_chain']['url'];
 	let response = await fetch(url);
 	let responseAsJson = await response.json();
@@ -280,14 +288,38 @@ function generateMoves(i) {
     about.appendChild(paragraph);
 }
 
+function closeDetailpage() {
+	document.getElementById('detailpage').innerHTML = '';
+	document.getElementById('fullpage').style.zIndex = 1;
+}
+
 function filterPokemons() {
 	let search = document.getElementById('search').value;
 	search = search.toLowerCase();
+	document.getElementById('show-pokemons').innerHTML = '';
+	let pokemon;
+	let element;
+
+	for (let i = 0; i < allPokemons.length; i++) {
+		pokemon = allPokemons[i];
+		element = generateElement(i)
+	}
 
 	for (let k = 0; k < allNames.length; k++) {
 		let name = allNames[k];
 		if(name.toLowerCase().includes(search)) {
-			console.log(`${name}`);
+			document.getElementById('show-pokemons').innerHTML += `
+			<div class="card flex ${getCardColorClass(pokemon['types'])}">
+				<div class="text">
+					<h2 id="pokemon-name">${name}</h2>
+					<div id="type" class="element">${element}</div>
+				</div>
+				<div class="images">
+					<img class="background" src="./img/pokeball-background.svg" alt="">
+					<img class="flex p-t-24 image" src="${pokemon['sprites']['other']['dream_world']['front_default']}" alt="${pokemon['name']}" alt="">
+				</div>
+			</div>
+			`;
 		}
 	}
 }

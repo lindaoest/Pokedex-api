@@ -62,3 +62,7 @@ h1 {
 .green {
 	background-color: rgb(107, 205, 107);
 }
+
+.gap-16 {
+	gap: 16px;
+}

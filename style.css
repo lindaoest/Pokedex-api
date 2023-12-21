@@ -44,13 +44,17 @@ header {
 	padding: 16px;
 	color: white;
 }
-.card:hover #pokemon-img {
+.card:hover .image {
 	transform: scale(1.1);
 	transition: all 0.5s ease-in-out;
 	cursor: pointer;
 }
-.card #pokemon-img {
+.card .image {
 	transition: all 0.5s ease-in-out;
+	margin-left: auto;
+	position: relative;
+	z-index: 1;
+	max-height: 180px;
 }
 .all-pokemons {
 	margin: 0 24px;
@@ -75,7 +79,7 @@ header {
 #detailpage {
 	display: flex;
     justify-content: center;
-	position: absolute;
+	position: fixed;
 	top: 0;
     left: 0;
     right: 0;
@@ -97,6 +101,10 @@ header {
 	margin-top: -50px;
 	width: 100%;
 	box-shadow: 4px 5px 12px gray;
+}
+#moves {
+	overflow: scroll;
+    height: 228px;
 }
 #info-table table {
 	padding: 20px 16px 20px 38px;
@@ -120,6 +128,9 @@ header {
 	padding: 4px 16px;
 	border-radius: 24px;
 }
+.back-arrow {
+	cursor: pointer;
+}
 .image {
 	position: relative;
 }
@@ -136,7 +147,7 @@ header {
 	margin-right: 32px;
 	position: relative;
 	z-index: 1;
-	max-height: 180px;
+	max-height: 229px;
 }
 .info-names {
 	padding-top: 32px;
