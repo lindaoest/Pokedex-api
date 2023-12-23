@@ -142,6 +142,7 @@ async function urlAbout(i) {
 	let response = await fetch(url);
 	let responseAsJson = await response.json();
 
+	pokemonSpezies = [];
 	pokemonSpezies.push(responseAsJson);
 }
 
@@ -253,18 +254,24 @@ async function generateEvolution() {
 	let about = document.getElementById('info-table');
 	about.innerHTML = `
 		<div class="evolution flex justify-center">
+		${evolution1 ? `
 			<div class="evolution-box">
 				<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemonId1}.svg">
 				<p>${evolution1}</p>
 			</div>
+		` : ``}
+		${evolution2 ? `
 			<div class="evolution-box">
 				<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemonId2}.svg">
 				<p>${evolution2}</p>
 			</div>
+		` : ``}
+		${evolution3 ? `
 			<div class="evolution-box">
 				<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemonId3}.svg">
 				<p>${evolution3}</p>
 			</div>
+		` : ``}
 		</div>
 	`;
 }
