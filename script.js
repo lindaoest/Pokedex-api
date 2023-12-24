@@ -2,6 +2,7 @@ let currentPokemon;
 let allPokemons = [];
 let pokemonSpezies = [];
 let allNames = [];
+let pokemonNames;
 
 async function loadPokemons() {
 	showLoader();
@@ -10,18 +11,9 @@ async function loadPokemons() {
 		let url = `https://pokeapi.co/api/v2/pokemon?limit=10&offset=0`;
 		let response = await fetch(url);
 		let responseAsJson = await response.json();
-		const pokemonNames = responseAsJson['results'];
+		pokemonNames = responseAsJson['results'];
 
-		for (let i = 0; i < pokemonNames.length; i++) {
-			let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
-			let response = await fetch(url);
-			currentPokemon = await response.json();
-
-			allNames.push(currentPokemon['name'])
-			allPokemons.push(currentPokemon);
-
-			document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
-		}
+		loopAllPokemons();
 	} catch(error) {
 		console.error('Error loading pokemons:', error);
 	} finally {
@@ -30,16 +22,34 @@ async function loadPokemons() {
 
 }
 
+async function loopAllPokemons(search) {
+	document.getElementById('show-pokemons').innerHTML = '';
+	for (let i = 0; i < pokemonNames.length; i++) {
+		let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
+		let response = await fetch(url);
+		let responseAsJson = await response.json();
+		if(document.getElementById('search').value !== '') {
+			if(responseAsJson['name'].toLowerCase().includes(search)) {
+				document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
+			}
+		} else {
+			allNames.push(responseAsJson['name'])
+			allPokemons.push(responseAsJson);
+			document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
+		}
+	}
+}
+
 function generatePokemons(i, pokemonNames) {
 	return `
-	<div onclick="showDetailpage(${i})" class="card flex ${getCardColorClass(currentPokemon['types'])}">
+	<div onclick="showDetailpage(${i})" class="card flex ${getCardColorClass(allPokemons[i]['types'])}">
 		<div class="text">
 			<h2 id="pokemon-name">${pokemonNames[i]['name']}</h2>
 			<div id="type" class="element">${generateElement(i)}</div>
 		</div>
 		<div class="images">
 			<img class="background" src="./img/pokeball-background.svg" alt="">
-			<img class="flex p-t-24 image" src="${currentPokemon['sprites']['other']['dream_world']['front_default']}" alt="">
+			<img class="flex p-t-24 image" src="${allPokemons[i]['sprites']['other']['dream_world']['front_default']}" alt="">
 		</div>
 	</div>
 	`;
@@ -303,32 +313,14 @@ function closeDetailpage() {
 function filterPokemons() {
 	let search = document.getElementById('search').value;
 	search = search.toLowerCase();
-	document.getElementById('show-pokemons').innerHTML = '';
-	let pokemon;
-	let element;
+	loopAllPokemons(search);
 
-	for (let i = 0; i < allPokemons.length; i++) {
-		pokemon = allPokemons[i];
-		element = generateElement(i)
-	}
-
-	for (let k = 0; k < allNames.length; k++) {
-		let name = allNames[k];
-		if(name.toLowerCase().includes(search)) {
-			document.getElementById('show-pokemons').innerHTML += `
-			<div class="card flex ${getCardColorClass(pokemon['types'])}">
-				<div class="text">
-					<h2 id="pokemon-name">${name}</h2>
-					<div id="type" class="element">${element}</div>
-				</div>
-				<div class="images">
-					<img class="background" src="./img/pokeball-background.svg" alt="">
-					<img class="flex p-t-24 image" src="${pokemon['sprites']['other']['dream_world']['front_default']}" alt="${pokemon['name']}" alt="">
-				</div>
-			</div>
-			`;
-		}
-	}
+	// for (let k = 0; k < allNames.length; k++) {
+	// 	let name = allNames[k];
+	// 	if(name.toLowerCase().includes(search)) {
+	// 		loopAllPokemons()
+	// 	}
+	// }
 }
 
 // async function loadPokemon() {
