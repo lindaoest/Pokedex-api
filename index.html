@@ -10,7 +10,7 @@
 </head>
 <body onload="loadPokemons()">
 	<div id="loading">
-		<img id="loading-spinner" src="./img/ball.png" width="160" height="160" alt="">
+		<img id="loading-spinner" src="./img/ball.png" width="160" height="160" alt="loading-spinner">
 	</div>
 	<div id="fullpage" class="fullpage">
 		<header>
@@ -18,6 +18,11 @@
 			<input id="search" class="search" placeholder="Suche" type="text" onkeyup="filterPokemons()">
 		</header>
 		<div id="show-pokemons" class="all-pokemons flex-wrap justify-center p-t-24"></div>
+		<div class="load-more flex justify-center p-tb-24" onclick="loadMorePokemons()">
+			<button class="button-load-more">
+				<p>Load more</p>
+			</button>
+		</div>
 	</div>
 	<div id="detailpage"></div>
 	<script src="./script.js"></script>

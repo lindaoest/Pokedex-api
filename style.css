@@ -1,6 +1,6 @@
 /* Homepage */
 #loading {
-	position: absolute;
+	position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
@@ -73,6 +73,16 @@ header {
     right: -45px;
     opacity: 0.4;
     width: 200px;
+}
+.button-load-more {
+	border-radius: 6px;
+    background-color: red;
+    border: 2px solid red;
+    padding: 8px 24px;
+}
+.button-load-more p {
+	font-size: 1.2rem;
+	color: #FFFFFF;
 }
 
 /* Detailpage */
@@ -158,6 +168,7 @@ header {
 .info {
 	width: calc(100% / 4);
 	text-align: center;
+	cursor: pointer;
 }
 #moves {
     padding: 16px;

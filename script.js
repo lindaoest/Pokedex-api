@@ -1,14 +1,16 @@
-let currentPokemon;
+//let currentPokemon;
 let allPokemons = [];
 let pokemonSpezies = [];
 let allNames = [];
 let pokemonNames;
+let limit = 10;
+
+getPokemons();
 
 async function loadPokemons() {
 	showLoader();
-
 	try {
-		let url = `https://pokeapi.co/api/v2/pokemon?limit=10&offset=0`;
+		let url = `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=0`;
 		let response = await fetch(url);
 		let responseAsJson = await response.json();
 		pokemonNames = responseAsJson['results'];
@@ -19,7 +21,6 @@ async function loadPokemons() {
 	} finally {
 		hideLoader();
 	}
-
 }
 
 async function loopAllPokemons(search) {
@@ -28,13 +29,16 @@ async function loopAllPokemons(search) {
 		let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
 		let response = await fetch(url);
 		let responseAsJson = await response.json();
-		if(document.getElementById('search').value !== '') {
+		if(document.getElementById('search').value.length > 3) {
 			if(responseAsJson['name'].toLowerCase().includes(search)) {
 				document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
 			}
 		} else {
-			allNames.push(responseAsJson['name'])
-			allPokemons.push(responseAsJson);
+			if(!allNames.includes(responseAsJson['name']) && !allPokemons.includes(responseAsJson)) {
+				allNames.push(responseAsJson['name'])
+				allPokemons.push(responseAsJson);
+			}
+			savePokemons();
 			document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
 		}
 	}
@@ -104,7 +108,11 @@ function getCardColorClass(types) {
             typeClass = 'blue';
         } else if (typeNull === 'water') {
             typeClass = 'blue';
-        }
+        } else if (typeNull === 'normal') {
+			typeClass = 'gray';
+		} else if (typeNull === 'bug') {
+			typeClass = 'brown';
+		}
     }
     return typeClass;
 }
@@ -159,6 +167,8 @@ async function urlAbout(i) {
 function generateAbout(i) {
 	let pokemon = allPokemons[i];
 
+	console.log(pokemonSpezies);
+
 	setTimeout(() => {
 		let about = document.getElementById('info-table');
 		about.innerHTML = `
@@ -186,15 +196,28 @@ function generateAbout(i) {
 				</tr>
 				<tr>
 					<td class="character">Egg Groups</td>
-					<td>${pokemonSpezies[0]['egg_groups'][0]['name']}</td>
+					<td>${pokemonSpecies()}</td>
 				</tr>
 				<tr>
 					<td class="character">Egg Cycle</td>
-					<td>${pokemonSpezies[0]['egg_groups'][1]['name']}</td>
+					<td>${pokemonSpecies()}</td>
 				</tr>
 			</table>
 		`;
 	}, 100);
+}
+
+function pokemonSpecies() {
+	let eggGroups = pokemonSpezies[0]['egg_groups'];
+	let groupsHtml = '';
+
+    for (let j = 0; j < eggGroups.length; j++) {
+        let group = eggGroups[j]['name'];
+        groupsHtml += `
+			<td>${group}</td>
+        `;
+    }
+	return groupsHtml;
 }
 
 function generateStats(i) {
@@ -240,50 +263,38 @@ function generateStats(i) {
 }
 
 async function generateEvolution() {
-	let url = pokemonSpezies[0]['evolution_chain']['url'];
-	let response = await fetch(url);
-	let responseAsJson = await response.json();
-	let evolution1 = responseAsJson['chain']['species']['name'];
-	let evolution2 = responseAsJson['chain']['evolves_to'][0]['species']['name'];
-	let evolution3 = responseAsJson['chain']['evolves_to'][0]['evolves_to'][0]['species']['name'];
+    let url = pokemonSpezies[0]['evolution_chain']['url'];
+    let response = await fetch(url);
+    let responseAsJson = await response.json();
 
-	function extractPokemonId(url) {
-		const parts = url.split('/');
-		return +parts[parts.length - 2];
-	}
+    function extractPokemonId(url) {
+        const parts = url.split('/');
+        return +parts[parts.length - 2];
+    }
 
-	let speciesUrl1 = responseAsJson['chain']['species']['url'];
-	let speciesUrl2 = responseAsJson['chain']['evolves_to'][0]['species']['url'];
-	let speciesUrl3 = responseAsJson['chain']['evolves_to'][0]['evolves_to'][0]['species']['url'];
-
-	// Die ID extrahieren
-	let pokemonId1 = extractPokemonId(speciesUrl1);
-	let pokemonId2 = extractPokemonId(speciesUrl2);
-	let pokemonId3 = extractPokemonId(speciesUrl3);
-
-	let about = document.getElementById('info-table');
-	about.innerHTML = `
-		<div class="evolution flex justify-center">
-		${evolution1 ? `
-			<div class="evolution-box">
-				<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemonId1}.svg">
-				<p>${evolution1}</p>
-			</div>
-		` : ``}
-		${evolution2 ? `
-			<div class="evolution-box">
-				<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemonId2}.svg">
-				<p>${evolution2}</p>
-			</div>
-		` : ``}
-		${evolution3 ? `
-			<div class="evolution-box">
-				<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemonId3}.svg">
-				<p>${evolution3}</p>
-			</div>
-		` : ``}
-		</div>
-	`;
+    let about = document.getElementById('info-table');
+    about.innerHTML = `
+        <div class="evolution flex justify-center">
+            ${responseAsJson['chain']['species'] ? `
+                <div class="evolution-box">
+                    <img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${extractPokemonId(responseAsJson['chain']['species']['url'])}.svg">
+                    <p>${responseAsJson['chain']['species']['name']}</p>
+                </div>
+            ` : ''}
+            ${responseAsJson['chain']['evolves_to'][0] ? `
+                <div class="evolution-box">
+                    <img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${extractPokemonId(responseAsJson['chain']['evolves_to'][0]['species']['url'])}.svg">
+                    <p>${responseAsJson['chain']['evolves_to'][0]['species']['name']}</p>
+                </div>
+            ` : ''}
+            ${responseAsJson['chain']['evolves_to'][0]?.['evolves_to'][0] ? `
+                <div class="evolution-box">
+                    <img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${extractPokemonId(responseAsJson['chain']['evolves_to'][0]['evolves_to'][0]['species']['url'])}.svg">
+                    <p>${responseAsJson['chain']['evolves_to'][0]['evolves_to'][0]['species']['name']}</p>
+                </div>
+            ` : ''}
+        </div>
+    `;
 }
 
 function generateMoves(i) {
@@ -314,28 +325,28 @@ function filterPokemons() {
 	let search = document.getElementById('search').value;
 	search = search.toLowerCase();
 	loopAllPokemons(search);
-
-	// for (let k = 0; k < allNames.length; k++) {
-	// 	let name = allNames[k];
-	// 	if(name.toLowerCase().includes(search)) {
-	// 		loopAllPokemons()
-	// 	}
-	// }
 }
 
-// async function loadPokemon() {
-// 	let url = `https://pokeapi.co/api/v2/pokemon/charmander`;
-// 	let response = await fetch(url);
-// 	currentPokemon = await response.json();
+function loadMorePokemons() {
+	limit += 10;
+	loadPokemons();
 
-// 	console.log(currentPokemon);
+}
 
-// 	document.getElementById('pokemon-name').innerHTML = currentPokemon['name'];
-// 	document.getElementById('pokemon-img').src = currentPokemon['sprites']['other']['dream_world']['front_default'];
+function savePokemons() {
+	let allNamesAsText = JSON.stringify(allNames);
+	let allPokemonsAsText = JSON.stringify(allPokemons);
 
-// 	renderPokemonInfo();
-// }
+	localStorage.setItem('names', allNamesAsText);
+	localStorage.setItem('pokemon', allPokemonsAsText);
+}
 
-// function renderPokemonInfo() {
+function getPokemons() {
+	let allNamesAsText = localStorage.getItem('names');
+	let allPokemonsAsText = localStorage.getItem('pokemon');
 
-// }
+	if(allNamesAsText && allPokemonsAsText) {
+		allNames = JSON.parse(allNamesAsText);
+		allPokemons = JSON.parse(allPokemonsAsText);
+	}
+}

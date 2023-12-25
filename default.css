@@ -49,6 +49,10 @@ h1 {
 .p-t-24 {
 	padding-top: 24px;
 }
+.p-tb-24 {
+	padding-top: 24px;
+	padding-bottom: 24px;
+}
 .m-t-16 {
 	margin-top: 16px;
 }
@@ -62,7 +66,12 @@ h1 {
 .green {
 	background-color: rgb(107, 205, 107);
 }
-
+.gray {
+	background-color: rgb(209, 204, 204);
+}
+.brown {
+	background-color: rgb(120, 43, 43);
+}
 .gap-16 {
 	gap: 16px;
 }
