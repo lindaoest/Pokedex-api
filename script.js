@@ -1,21 +1,51 @@
-//let currentPokemon;
 let allPokemons = [];
 let pokemonSpezies = [];
 let allNames = [];
-let pokemonNames;
 let limit = 10;
+let startNumber = 0;
+
+let pokemonContainer = document.getElementById('show-pokemons');
 
 getPokemons();
 
 async function loadPokemons() {
 	showLoader();
 	try {
-		let url = `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=0`;
-		let response = await fetch(url);
-		let responseAsJson = await response.json();
-		pokemonNames = responseAsJson['results'];
 
-		loopAllPokemons();
+		for (let i = 0; i < limit; i++) {
+			if(!allNames.includes(allPokemons[i]['name']) && !allPokemons.includes(allPokemons[i])) {
+				let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
+				let response = await fetch(url);
+				let responseAsJson = await response.json();
+				allPokemons.push(responseAsJson);
+				allNames.push(responseAsJson['name']);
+				pokemonContainer.innerHTML += generatePokemons(i);
+			} else {
+				pokemonContainer.innerHTML += generatePokemons(i);
+			}
+			// let allNamesAsText = localStorage.getItem('names');
+			// let allPokemonsAsText = localStorage.getItem('pokemon');
+
+			// if(allNamesAsText && allPokemonsAsText) {
+			// 	let allNamesAsText = localStorage.getItem('names');
+			// 	let allPokemonsAsText = localStorage.getItem('pokemon');
+
+			// 	allNames = JSON.parse(allNamesAsText);
+			// 	allPokemons = JSON.parse(allPokemonsAsText);
+
+			// 	pokemonContainer.innerHTML += generatePokemons(i);
+			// } else {
+			// 	if(allNames.length == 0 && allPokemons.length == 0) {
+			// 		let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
+			// 		let response = await fetch(url);
+			// 		let responseAsJson = await response.json();
+			// 		allPokemons.push(responseAsJson);
+			// 		allNames.push(responseAsJson['name']);
+			// 		pokemonContainer.innerHTML += generatePokemons(i);
+			// 	}
+			// }
+		}
+		savePokemons();
 	} catch(error) {
 		console.error('Error loading pokemons:', error);
 	} finally {
@@ -23,32 +53,35 @@ async function loadPokemons() {
 	}
 }
 
-async function loopAllPokemons(search) {
-	document.getElementById('show-pokemons').innerHTML = '';
-	for (let i = 0; i < pokemonNames.length; i++) {
-		let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
-		let response = await fetch(url);
-		let responseAsJson = await response.json();
-		if(document.getElementById('search').value.length > 3) {
-			if(responseAsJson['name'].toLowerCase().includes(search)) {
-				document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
-			}
-		} else {
-			if(!allNames.includes(responseAsJson['name']) && !allPokemons.includes(responseAsJson)) {
-				allNames.push(responseAsJson['name'])
-				allPokemons.push(responseAsJson);
-			}
-			savePokemons();
-			document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
-		}
-	}
-}
+// async function renderPokemons(search) {
+// 	document.getElementById('show-pokemons').innerHTML = '';
+// 	for (let i = 0; i < pokemonNames.length; i++) {
+// 		let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
+// 		let response = await fetch(url);
+// 		let responseAsJson = await response.json();
+// 		if(document.getElementById('search').value.length > 3) {
+// 			if(responseAsJson['name'].toLowerCase().includes(search)) {
+// 				document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
+// 			}
+// 		} else {
+// 			if(!allNames.includes(responseAsJson['name']) && !allPokemons.includes(responseAsJson)) {
+// 				allNames.push(responseAsJson['name'])
+// 				allPokemons.push(responseAsJson);
 
-function generatePokemons(i, pokemonNames) {
+// 				console.log('allNames', allNames);
+// 				console.log('allPokemons', allPokemons);
+// 			}
+// 			savePokemons();
+// 			document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
+// 		}
+// 	}
+// }
+
+function generatePokemons(i) {
 	return `
 	<div onclick="showDetailpage(${i})" class="card flex ${getCardColorClass(allPokemons[i]['types'])}">
 		<div class="text">
-			<h2 id="pokemon-name">${pokemonNames[i]['name']}</h2>
+			<h2 id="pokemon-name">${allPokemons[i]['name']}</h2>
 			<div id="type" class="element">${generateElement(i)}</div>
 		</div>
 		<div class="images">
@@ -194,30 +227,23 @@ function generateAbout(i) {
 						<h3>Breeding</h3>
 					</td>
 				</tr>
-				<tr>
-					<td class="character">Egg Groups</td>
-					<td>${pokemonSpecies()}</td>
-				</tr>
-				<tr>
-					<td class="character">Egg Cycle</td>
-					<td>${pokemonSpecies()}</td>
-				</tr>
+				${pokemonSpezies[0]['egg_groups'][0]['name'] ? `
+					<tr>
+						<td class="character">Egg Groups</td>
+						<td>${pokemonSpezies[0]['egg_groups'][0]['name']}</td>
+					</tr>
+					` : ''
+				}
+				${pokemonSpezies[0]['egg_groups'][1]['name'] ? `
+					<tr>
+						<td class="character">Egg Groups</td>
+						<td>${pokemonSpezies[0]['egg_groups'][1]['name']}</td>
+					</tr>
+					` : ''
+				}
 			</table>
 		`;
 	}, 100);
-}
-
-function pokemonSpecies() {
-	let eggGroups = pokemonSpezies[0]['egg_groups'];
-	let groupsHtml = '';
-
-    for (let j = 0; j < eggGroups.length; j++) {
-        let group = eggGroups[j]['name'];
-        groupsHtml += `
-			<td>${group}</td>
-        `;
-    }
-	return groupsHtml;
 }
 
 function generateStats(i) {
@@ -300,20 +326,18 @@ async function generateEvolution() {
 function generateMoves(i) {
 	let pokemon = allPokemons[i];
 	let moves = pokemon['moves'];
-
-	let about = document.getElementById('info-table');
-	about.innerHTML = '';
-
-	let paragraph = document.createElement('p'); // Erstelle ein neues <p>-Element
-    paragraph.id = 'moves';
+	let paragraphHtml = '<p id="moves">';
 
 	for (let j = 0; j < moves.length; j++) {
-		const move = moves[j]['move']['name'];
-		paragraph.appendChild(document.createTextNode(move + ', ')); // Füge Textknoten hinzu
+	  let move = moves[j]['move']['name'];
+	  paragraphHtml += move + ', ';
 	}
 
-	// Füge das <p>-Element mit den Textknoten dem 'info-table'-Element hinzu
-    about.appendChild(paragraph);
+	// Entferne das letzte Komma und füge das schließende P-Tag hinzu
+	paragraphHtml = paragraphHtml.replace(/, $/, '') + '</p>';
+
+	let about = document.getElementById('info-table');
+	about.innerHTML = paragraphHtml;
 }
 
 function closeDetailpage() {
@@ -322,13 +346,21 @@ function closeDetailpage() {
 }
 
 function filterPokemons() {
-	let search = document.getElementById('search').value;
-	search = search.toLowerCase();
-	loopAllPokemons(search);
+    let search = document.getElementById('search').value.toLowerCase();
+    pokemonContainer.innerHTML = '';
+
+    for (let i = 0; i < allPokemons.length; i++) {
+        let pokemonName = allPokemons[i]['name'].toLowerCase();
+
+        if (pokemonName.includes(search)) {
+            pokemonContainer.innerHTML += generatePokemons(i);
+        }
+    }
 }
 
 function loadMorePokemons() {
 	limit += 10;
+	startNumber += 10;
 	loadPokemons();
 
 }
