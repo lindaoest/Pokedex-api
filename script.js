@@ -10,42 +10,12 @@ getPokemons();
 
 async function loadPokemons() {
 	showLoader();
+	allPokemons = [];
+	allNames = [];
+	limit = 10;
+	startNumber = 0;
 	try {
-
-		for (let i = 0; i < limit; i++) {
-			if(!allNames.includes(allPokemons[i]['name']) && !allPokemons.includes(allPokemons[i])) {
-				let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
-				let response = await fetch(url);
-				let responseAsJson = await response.json();
-				allPokemons.push(responseAsJson);
-				allNames.push(responseAsJson['name']);
-				pokemonContainer.innerHTML += generatePokemons(i);
-			} else {
-				pokemonContainer.innerHTML += generatePokemons(i);
-			}
-			// let allNamesAsText = localStorage.getItem('names');
-			// let allPokemonsAsText = localStorage.getItem('pokemon');
-
-			// if(allNamesAsText && allPokemonsAsText) {
-			// 	let allNamesAsText = localStorage.getItem('names');
-			// 	let allPokemonsAsText = localStorage.getItem('pokemon');
-
-			// 	allNames = JSON.parse(allNamesAsText);
-			// 	allPokemons = JSON.parse(allPokemonsAsText);
-
-			// 	pokemonContainer.innerHTML += generatePokemons(i);
-			// } else {
-			// 	if(allNames.length == 0 && allPokemons.length == 0) {
-			// 		let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
-			// 		let response = await fetch(url);
-			// 		let responseAsJson = await response.json();
-			// 		allPokemons.push(responseAsJson);
-			// 		allNames.push(responseAsJson['name']);
-			// 		pokemonContainer.innerHTML += generatePokemons(i);
-			// 	}
-			// }
-		}
-		savePokemons();
+		await renderPokemons();
 	} catch(error) {
 		console.error('Error loading pokemons:', error);
 	} finally {
@@ -53,29 +23,21 @@ async function loadPokemons() {
 	}
 }
 
-// async function renderPokemons(search) {
-// 	document.getElementById('show-pokemons').innerHTML = '';
-// 	for (let i = 0; i < pokemonNames.length; i++) {
-// 		let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
-// 		let response = await fetch(url);
-// 		let responseAsJson = await response.json();
-// 		if(document.getElementById('search').value.length > 3) {
-// 			if(responseAsJson['name'].toLowerCase().includes(search)) {
-// 				document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
-// 			}
-// 		} else {
-// 			if(!allNames.includes(responseAsJson['name']) && !allPokemons.includes(responseAsJson)) {
-// 				allNames.push(responseAsJson['name'])
-// 				allPokemons.push(responseAsJson);
-
-// 				console.log('allNames', allNames);
-// 				console.log('allPokemons', allPokemons);
-// 			}
-// 			savePokemons();
-// 			document.getElementById('show-pokemons').innerHTML += generatePokemons(i, pokemonNames);
-// 		}
-// 	}
-// }
+async function renderPokemons() {
+	for (let i = startNumber; i < limit; i++) {
+		if (!allNames.includes(allPokemons[i]) && !allPokemons.includes(allPokemons[i])) {
+			let url = `https://pokeapi.co/api/v2/pokemon/${i + 1}`;
+			let response = await fetch(url);
+			let responseAsJson = await response.json();
+			allPokemons.push(responseAsJson);
+			allNames.push(responseAsJson['name']);
+			pokemonContainer.innerHTML += generatePokemons(i);
+		} else {
+			pokemonContainer.innerHTML += generatePokemons(i);
+		}
+	}
+	savePokemons();
+}
 
 function generatePokemons(i) {
 	return `
@@ -361,24 +323,32 @@ function filterPokemons() {
 function loadMorePokemons() {
 	limit += 10;
 	startNumber += 10;
-	loadPokemons();
+	renderPokemons();
 
 }
 
 function savePokemons() {
 	let allNamesAsText = JSON.stringify(allNames);
 	let allPokemonsAsText = JSON.stringify(allPokemons);
+	let limitAsText = JSON.stringify(limit);
+	let startNumberAsText = JSON.stringify(startNumber);
 
 	localStorage.setItem('names', allNamesAsText);
 	localStorage.setItem('pokemon', allPokemonsAsText);
+	localStorage.setItem('limit', limitAsText);
+	localStorage.setItem('startNumber', startNumberAsText);
 }
 
 function getPokemons() {
 	let allNamesAsText = localStorage.getItem('names');
 	let allPokemonsAsText = localStorage.getItem('pokemon');
+	let limitAsText = localStorage.getItem('limit');
+	let startNumberAsText = localStorage.getItem('startNumber');
 
 	if(allNamesAsText && allPokemonsAsText) {
 		allNames = JSON.parse(allNamesAsText);
 		allPokemons = JSON.parse(allPokemonsAsText);
+		limit = JSON.parse(limitAsText);
+		startNumber = JSON.parse(startNumberAsText);
 	}
 }
