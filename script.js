@@ -107,17 +107,32 @@ function getCardColorClass(types) {
 			typeClass = 'gray';
 		} else if (typeNull === 'bug') {
 			typeClass = 'brown';
+		} else if (typeNull === 'poison') {
+			typeClass = 'lightgreen';
+		} else if (typeNull === 'ground') {
+			typeClass = 'lightbrown';
+		} else if (typeNull === 'electric') {
+			typeClass = 'purple';
+		} else if (typeNull === 'fairy') {
+			typeClass = 'rosa';
 		}
     }
     return typeClass;
 }
 
-function showDetailpage(i) {
-	let pokemon = allPokemons[i];
-	urlAbout(i);
+async function showDetailpage(i) {
+	showLoader();
+	try {
+		let pokemon = allPokemons[i];
+		urlAbout(i);
 
-	document.getElementById('fullpage').style.zIndex = 0;
-	document.getElementById('detailpage').innerHTML = generateDetailpage(pokemon, i);
+		document.getElementById('fullpage').style.zIndex = 0;
+		document.getElementById('detailpage').innerHTML = generateDetailpage(pokemon, i);
+	} catch(error) {
+		console.error('Error loading detailpage:', error);
+	} finally {
+		hideLoader();
+	}
 }
 
 function generateDetailpage(pokemon, i) {
@@ -189,14 +204,14 @@ function generateAbout(i) {
 						<h3>Breeding</h3>
 					</td>
 				</tr>
-				${pokemonSpezies[0]['egg_groups'][0]['name'] ? `
+				${pokemonSpezies[0]['egg_groups'][0] ? `
 					<tr>
 						<td class="character">Egg Groups</td>
 						<td>${pokemonSpezies[0]['egg_groups'][0]['name']}</td>
 					</tr>
 					` : ''
 				}
-				${pokemonSpezies[0]['egg_groups'][1]['name'] ? `
+				${pokemonSpezies[0]['egg_groups'][1] ? `
 					<tr>
 						<td class="character">Egg Groups</td>
 						<td>${pokemonSpezies[0]['egg_groups'][1]['name']}</td>
@@ -262,7 +277,7 @@ async function generateEvolution() {
 
     let about = document.getElementById('info-table');
     about.innerHTML = `
-        <div class="evolution flex justify-center">
+        <div class="evolution flex-wrap justify-center">
             ${responseAsJson['chain']['species'] ? `
                 <div class="evolution-box">
                     <img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${extractPokemonId(responseAsJson['chain']['species']['url'])}.svg">

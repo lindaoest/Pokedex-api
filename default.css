@@ -72,6 +72,18 @@ h1 {
 .brown {
 	background-color: rgb(120, 43, 43);
 }
+.lightgreen {
+	background-color: rgb(120, 255, 120);
+}
+.lightbrown {
+	background-color: rgb(163, 84, 84);
+}
+.purple {
+	background-color: rgb(114, 9, 146);
+}
+.rosa {
+	background-color: rgb(228, 131, 203);
+}
 .gap-16 {
 	gap: 16px;
 }
