@@ -5,6 +5,8 @@ let limit = 10;
 let startNumber = 0;
 
 let pokemonContainer = document.getElementById('show-pokemons');
+let detailpage = document.getElementById('detailpage');
+let fullpage = document.getElementById('fullpage');
 
 getPokemons();
 
@@ -94,28 +96,7 @@ function getCardColorClass(types) {
     if (types.length > 0) {
         let typeNull = types[0]['type']['name'];
 
-        // Überprüfe den Typ und setze die entsprechende Klasse
-        if (typeNull === 'grass') {
-            typeClass = 'green';
-        } else if (typeNull === 'fire') {
-            typeClass = 'red';
-        } else if (typeNull === 'sky') {
-            typeClass = 'blue';
-        } else if (typeNull === 'water') {
-            typeClass = 'blue';
-        } else if (typeNull === 'normal') {
-			typeClass = 'gray';
-		} else if (typeNull === 'bug') {
-			typeClass = 'brown';
-		} else if (typeNull === 'poison') {
-			typeClass = 'lightgreen';
-		} else if (typeNull === 'ground') {
-			typeClass = 'lightbrown';
-		} else if (typeNull === 'electric') {
-			typeClass = 'purple';
-		} else if (typeNull === 'fairy') {
-			typeClass = 'rosa';
-		}
+		typeClass = typeNull;
     }
     return typeClass;
 }
@@ -126,8 +107,9 @@ async function showDetailpage(i) {
 		let pokemon = allPokemons[i];
 		urlAbout(i);
 
-		document.getElementById('fullpage').style.zIndex = 0;
-		document.getElementById('detailpage').innerHTML = generateDetailpage(pokemon, i);
+		fullpage.style.zIndex = 0;
+		detailpage.style.display = 'flex';
+		detailpage.innerHTML = await generateDetailpage(pokemon, i);
 	} catch(error) {
 		console.error('Error loading detailpage:', error);
 	} finally {
@@ -135,7 +117,7 @@ async function showDetailpage(i) {
 	}
 }
 
-function generateDetailpage(pokemon, i) {
+async function generateDetailpage(pokemon, i) {
 	return `
 	<div id="pokedex" class="${getCardColorClass(pokemon['types'])}">
 		<div class="p-16">
@@ -175,52 +157,53 @@ async function urlAbout(i) {
 }
 
 function generateAbout(i) {
-	let pokemon = allPokemons[i];
-
-	console.log(pokemonSpezies);
-
 	setTimeout(() => {
 		let about = document.getElementById('info-table');
-		about.innerHTML = `
-			<table>
-				<tr>
-					<td class="character">Species</td>
-					<td>${pokemonSpezies[0]['genera'][7]['genus']}</td>
-				</tr>
-				<tr>
-					<td class="character">Height</td>
-					<td>${pokemon['height']}cm</td>
-				</tr>
-				<tr>
-					<td class="character">Weight</td>
-					<td>${pokemon['weight']}g</td>
-				</tr>
-				<tr>
-					<td class="character">Abilities</td>
-					<td>${generateAbility(i)}</td>
-				</tr>
-				<tr>
-					<td>
-						<h3>Breeding</h3>
-					</td>
-				</tr>
-				${pokemonSpezies[0]['egg_groups'][0] ? `
-					<tr>
-						<td class="character">Egg Groups</td>
-						<td>${pokemonSpezies[0]['egg_groups'][0]['name']}</td>
-					</tr>
-					` : ''
-				}
-				${pokemonSpezies[0]['egg_groups'][1] ? `
-					<tr>
-						<td class="character">Egg Groups</td>
-						<td>${pokemonSpezies[0]['egg_groups'][1]['name']}</td>
-					</tr>
-					` : ''
-				}
-			</table>
-		`;
+		about.innerHTML = generateAboutHtml(i);
 	}, 100);
+}
+
+function generateAboutHtml(i) {
+	let pokemon = allPokemons[i];
+	return `
+		<table>
+			<tr>
+				<td class="character">Species</td>
+				<td>${pokemonSpezies[0]['genera'][7]['genus']}</td>
+			</tr>
+			<tr>
+				<td class="character">Height</td>
+				<td>${pokemon['height']}cm</td>
+			</tr>
+			<tr>
+				<td class="character">Weight</td>
+				<td>${pokemon['weight']}g</td>
+			</tr>
+			<tr>
+				<td class="character">Abilities</td>
+				<td>${generateAbility(i)}</td>
+			</tr>
+			<tr>
+				<td>
+					<h3>Breeding</h3>
+				</td>
+			</tr>
+			${pokemonSpezies[0]['egg_groups'][0] ? `
+				<tr>
+					<td class="character">Egg Groups</td>
+					<td>${pokemonSpezies[0]['egg_groups'][0]['name']}</td>
+				</tr>
+				` : ''
+			}
+			${pokemonSpezies[0]['egg_groups'][1] ? `
+				<tr>
+					<td class="character">Egg Groups</td>
+					<td>${pokemonSpezies[0]['egg_groups'][1]['name']}</td>
+				</tr>
+				` : ''
+			}
+		</table>
+	`;
 }
 
 function generateStats(i) {
@@ -270,34 +253,38 @@ async function generateEvolution() {
     let response = await fetch(url);
     let responseAsJson = await response.json();
 
-    function extractPokemonId(url) {
-        const parts = url.split('/');
-        return +parts[parts.length - 2];
-    }
-
     let about = document.getElementById('info-table');
-    about.innerHTML = `
-        <div class="evolution flex-wrap justify-center">
-            ${responseAsJson['chain']['species'] ? `
-                <div class="evolution-box">
-                    <img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${extractPokemonId(responseAsJson['chain']['species']['url'])}.svg">
-                    <p>${responseAsJson['chain']['species']['name']}</p>
-                </div>
-            ` : ''}
-            ${responseAsJson['chain']['evolves_to'][0] ? `
-                <div class="evolution-box">
-                    <img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${extractPokemonId(responseAsJson['chain']['evolves_to'][0]['species']['url'])}.svg">
-                    <p>${responseAsJson['chain']['evolves_to'][0]['species']['name']}</p>
-                </div>
-            ` : ''}
-            ${responseAsJson['chain']['evolves_to'][0]?.['evolves_to'][0] ? `
-                <div class="evolution-box">
-                    <img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${extractPokemonId(responseAsJson['chain']['evolves_to'][0]['evolves_to'][0]['species']['url'])}.svg">
-                    <p>${responseAsJson['chain']['evolves_to'][0]['evolves_to'][0]['species']['name']}</p>
-                </div>
-            ` : ''}
-        </div>
-    `;
+    about.innerHTML = generateEvolutionHtml(responseAsJson);
+}
+
+function extractPokemonId(url) {
+	const parts = url.split('/');
+	return +parts[parts.length - 2];
+}
+
+function generateEvolutionHtml(responseAsJson) {
+	return `
+		<div class="evolution flex-wrap justify-center">
+			${responseAsJson['chain']['species'] ? `
+				<div class="evolution-box">
+					<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${extractPokemonId(responseAsJson['chain']['species']['url'])}.svg">
+					<p>${responseAsJson['chain']['species']['name']}</p>
+				</div>
+			` : ''}
+			${responseAsJson['chain']['evolves_to'][0] ? `
+				<div class="evolution-box">
+					<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${extractPokemonId(responseAsJson['chain']['evolves_to'][0]['species']['url'])}.svg">
+					<p>${responseAsJson['chain']['evolves_to'][0]['species']['name']}</p>
+				</div>
+			` : ''}
+			${responseAsJson['chain']['evolves_to'][0]?.['evolves_to'][0] ? `
+				<div class="evolution-box">
+					<img class="evolution-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${extractPokemonId(responseAsJson['chain']['evolves_to'][0]['evolves_to'][0]['species']['url'])}.svg">
+					<p>${responseAsJson['chain']['evolves_to'][0]['evolves_to'][0]['species']['name']}</p>
+				</div>
+			` : ''}
+		</div>
+	`;
 }
 
 function generateMoves(i) {
@@ -318,8 +305,9 @@ function generateMoves(i) {
 }
 
 function closeDetailpage() {
-	document.getElementById('detailpage').innerHTML = '';
-	document.getElementById('fullpage').style.zIndex = 1;
+	detailpage.style.display = 'none';
+	detailpage.innerHTML = '';
+	fullpage.style.zIndex = 1;
 }
 
 function filterPokemons() {
@@ -335,10 +323,17 @@ function filterPokemons() {
     }
 }
 
-function loadMorePokemons() {
-	limit += 10;
-	startNumber += 10;
-	renderPokemons();
+async function loadMorePokemons() {
+	try {
+		limit += 10;
+		startNumber += 10;
+		document.getElementById('load-more').disabled = true;
+		await renderPokemons();
+	} catch(error) {
+		console.error('Error loading pokemons:', error);
+	} finally {
+		document.getElementById('load-more').disabled = false;
+	}
 
 }
 

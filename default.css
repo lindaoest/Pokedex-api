@@ -57,31 +57,34 @@ h1 {
 	margin-top: 16px;
 }
 
-.red {
+.fire {
 	background-color: rgb(219, 144, 53);
 }
-.blue {
+.sky {
 	background-color: rgb(93, 204, 241);
 }
-.green {
+.water {
+	background-color: rgb(9, 111, 146);
+}
+.grass {
 	background-color: rgb(107, 205, 107);
 }
-.gray {
+.normal {
 	background-color: rgb(209, 204, 204);
 }
-.brown {
+.bug {
 	background-color: rgb(120, 43, 43);
 }
-.lightgreen {
+.poison {
 	background-color: rgb(120, 255, 120);
 }
-.lightbrown {
+.ground {
 	background-color: rgb(163, 84, 84);
 }
-.purple {
+.electric {
 	background-color: rgb(114, 9, 146);
 }
-.rosa {
+.fairy {
 	background-color: rgb(228, 131, 203);
 }
 .gap-16 {
