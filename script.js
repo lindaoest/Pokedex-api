@@ -84,7 +84,7 @@ function generateAbility(i) {
     for (let j = 0; j < abilities.length; j++) {
         let ability = abilities[j]['ability']['name'];
         abilitiesHTML += `
-            ${ability}
+			<div>${ability}</div>
         `;
     }
     return abilitiesHTML; // Gib den generierten HTML-Code zurück
@@ -105,11 +105,11 @@ async function showDetailpage(i) {
 	showLoader();
 	try {
 		let pokemon = allPokemons[i];
-		urlAbout(i);
+		await urlAbout(i);
 
 		fullpage.style.zIndex = 0;
 		detailpage.style.display = 'flex';
-		detailpage.innerHTML = await generateDetailpage(pokemon, i);
+		detailpage.innerHTML = generateDetailpage(pokemon, i);
 	} catch(error) {
 		console.error('Error loading detailpage:', error);
 	} finally {
@@ -117,7 +117,7 @@ async function showDetailpage(i) {
 	}
 }
 
-async function generateDetailpage(pokemon, i) {
+function generateDetailpage(pokemon, i) {
 	return `
 	<div id="pokedex" class="${getCardColorClass(pokemon['types'])}">
 		<div class="p-16">
@@ -141,26 +141,24 @@ async function generateDetailpage(pokemon, i) {
 				<p class="info" onclick="generateEvolution()">Evolution</p>
 				<p class="info" onclick="generateMoves(${i})">Moves</p>
 			</div>
-			<div id="info-table">${generateAbout(i)}</div>
+			<div id="info-table">${generateAboutHtml(i)}</div>
 		</div>
 	</div>
 	`;
 }
 
 async function urlAbout(i) {
+	pokemonSpezies = [];
 	let url = `https://pokeapi.co/api/v2/pokemon-species/${i + 1}/`;
 	let response = await fetch(url);
 	let responseAsJson = await response.json();
 
-	pokemonSpezies = [];
 	pokemonSpezies.push(responseAsJson);
 }
 
-function generateAbout(i) {
-	setTimeout(() => {
-		let about = document.getElementById('info-table');
-		about.innerHTML = generateAboutHtml(i);
-	}, 100);
+async function generateAbout(i) {
+	let about = document.getElementById('info-table');
+	about.innerHTML = generateAboutHtml(i);
 }
 
 function generateAboutHtml(i) {
